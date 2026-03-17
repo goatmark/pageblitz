@@ -1,4 +1,4 @@
-import SubmitForm from "@/components/SubmitForm";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -7,12 +7,12 @@ export default function Home() {
       <nav className="border-b border-zinc-900 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <span className="font-bold text-lg tracking-tight">PageBlitz</span>
-          <a
-            href="#submit"
+          <Link
+            href="/submit"
             className="px-4 py-2 rounded-lg bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition-colors"
           >
-            Submit a URL
-          </a>
+            Get started
+          </Link>
         </div>
       </nav>
 
@@ -35,11 +35,18 @@ export default function Home() {
           <span className="text-zinc-400">Getting found is not.</span>
         </h1>
 
-        <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
           PageBlitz submits your pages directly to Google&apos;s Indexing API —
           bypassing the crawl queue and getting you in front of search engines
           and LLMs in hours, not months.
         </p>
+
+        <Link
+          href="/submit"
+          className="inline-block px-8 py-4 rounded-xl bg-white text-zinc-900 font-bold text-base hover:bg-zinc-100 transition-colors"
+        >
+          Get started — it&apos;s free
+        </Link>
       </section>
 
       {/* Three pain points */}
@@ -76,9 +83,7 @@ export default function Home() {
       <section className="border-t border-zinc-900 py-20 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-4 mb-14">
           <h2 className="text-3xl font-bold">How it works</h2>
-          <p className="text-zinc-400">
-            One-time Google setup. Then paste URLs and submit.
-          </p>
+          <p className="text-zinc-400">One-time Google setup. Then paste URLs and go.</p>
         </div>
 
         <div className="max-w-3xl mx-auto space-y-4">
@@ -86,17 +91,17 @@ export default function Home() {
             {
               step: "1",
               title: "Create a Google service account",
-              body: "In Google Cloud Console, enable the Indexing API and create a service account. Download the JSON key. Takes about 5 minutes.",
+              body: "In Google Cloud Console, enable the Indexing API, create a service account, and download the JSON key. Takes about 5 minutes.",
             },
             {
               step: "2",
               title: "Add it as Owner in Search Console",
-              body: "In Google Search Console, add your service account email as an Owner of your property. This authorizes PageBlitz to submit on your behalf.",
+              body: "In Google Search Console, add the service account email as an Owner of your property. This is how Google knows you've authorized the submissions.",
             },
             {
               step: "3",
-              title: "Submit your URLs",
-              body: "Paste your service account JSON and your URLs below. PageBlitz calls the Indexing API directly. Google prioritizes these over passive crawl queue requests.",
+              title: "Paste your key and URLs — done",
+              body: "PageBlitz calls the Indexing API directly. Google prioritizes these requests over passive crawling. Your key is never stored.",
             },
           ].map((item) => (
             <div
@@ -113,18 +118,14 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
 
-      {/* Submit form — no auth required */}
-      <section id="submit" className="border-t border-zinc-900 py-20 px-6">
-        <div className="max-w-2xl mx-auto space-y-8">
-          <div className="text-center space-y-3">
-            <h2 className="text-3xl font-bold">Submit your pages</h2>
-            <p className="text-zinc-400 text-sm">
-              No account required. Your service account key never leaves your browser.
-            </p>
-          </div>
-          <SubmitForm />
+        <div className="text-center mt-12">
+          <Link
+            href="/submit"
+            className="inline-block px-8 py-4 rounded-xl bg-white text-zinc-900 font-bold text-base hover:bg-zinc-100 transition-colors"
+          >
+            Submit your pages
+          </Link>
         </div>
       </section>
 
