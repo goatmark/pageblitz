@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, CheckCircle2, XCircle, ArrowRight, ExternalLink } from "lucide-react";
-
-const SA_EMAIL = process.env.NEXT_PUBLIC_PAGEBLITZ_SA_EMAIL ?? "indexer@pageblitz-prod.iam.gserviceaccount.com";
 
 type Step = "domain" | "verify" | "crawling" | "review" | "submitting" | "done";
 
@@ -23,6 +21,14 @@ export default function BlitzFlow() {
   const [results, setResults] = useState<UrlResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [saEmail, setSaEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((d) => setSaEmail(d.saEmail))
+      .catch(() => null);
+  }, []);
 
   async function handleCrawl() {
     setLoading(true);
@@ -145,9 +151,9 @@ export default function BlitzFlow() {
             </div>
 
             <div className="rounded-lg bg-zinc-800 px-4 py-3 flex items-center justify-between gap-3">
-              <span className="text-xs font-mono text-zinc-300 break-all">{SA_EMAIL}</span>
+              <span className="text-xs font-mono text-zinc-300 break-all">{saEmail ?? "loading..."}</span>
               <button
-                onClick={() => navigator.clipboard.writeText(SA_EMAIL)}
+                onClick={() => navigator.clipboard.writeText(saEmail ?? "")}
                 className="flex-shrink-0 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
               >
                 Copy
