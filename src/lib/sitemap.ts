@@ -1,5 +1,3 @@
-import { parseStringPromise } from "xml2js";
-
 export interface SitemapResult {
   urls: string[];
   error?: string;
@@ -22,27 +20,41 @@ async function fetchXml(url: string): Promise<string | null> {
   }
 }
 
-async function parseSitemapXml(xml: string, sourceUrl: string): Promise<{
-  urls: string[];
-  childSitemaps: string[];
-}> {
-  const parsed = await parseStringPromise(xml, { explicitArray: true });
+function extractTags(xml: string, tag: string): string[] {
+  const results: string[] = [];
+  const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, "gi");
+  let match;
+  while ((match = re.exec(xml)) !== null) {
+    results.push(match[1].trim());
+  }
+  return results;
+}
+
+function parseSitemapXml(xml: string): { urls: string[]; childSitemaps: string[] } {
   const urls: string[] = [];
   const childSitemaps: string[] = [];
 
-  // Sitemap index (points to other sitemaps)
-  if (parsed.sitemapindex?.sitemap) {
-    for (const s of parsed.sitemapindex.sitemap) {
-      const loc = s.loc?.[0];
-      if (loc) childSitemaps.push(loc.trim());
-    }
-  }
+  const isSitemapIndex = /<sitemapindex/i.test(xml);
 
-  // Regular sitemap (contains URLs)
-  if (parsed.urlset?.url) {
-    for (const u of parsed.urlset.url) {
-      const loc = u.loc?.[0];
-      if (loc) urls.push(loc.trim());
+  if (isSitemapIndex) {
+    // Extract <loc> inside each <sitemap> block
+    const sitemapBlocks = extractTags(xml, "sitemap");
+    for (const block of sitemapBlocks) {
+      const locs = extractTags(block, "loc");
+      if (locs[0]) childSitemaps.push(locs[0]);
+    }
+  } else {
+    // Regular urlset — extract <loc> inside each <url> block
+    const urlBlocks = extractTags(xml, "url");
+    for (const block of urlBlocks) {
+      const locs = extractTags(block, "loc");
+      if (locs[0]) urls.push(locs[0]);
+    }
+    // Fallback: bare <loc> tags
+    if (urls.length === 0) {
+      for (const loc of extractTags(xml, "loc")) {
+        urls.push(loc);
+      }
     }
   }
 
@@ -96,7 +108,7 @@ export async function crawlSitemap(domain: string): Promise<SitemapResult> {
     sitemapsFound.push(url);
 
     try {
-      const { urls, childSitemaps } = await parseSitemapXml(xml, url);
+      const { urls, childSitemaps } = parseSitemapXml(xml);
 
       for (const u of urls) {
         if (allUrls.size < MAX_URLS) allUrls.add(u);
